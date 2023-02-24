@@ -2,13 +2,17 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 import express from "express";
-
-// import routes from "./api/routes/index";
+import "express-async-errors";
+import routes from "./api/routes/index";
+import { connectDB } from "./config/db";
+import globalErrorHandler from "./api/middlewares/globalErrorHandler";
 
 const app = express();
 app.use(express.json());
+connectDB();
 
-// app.use("/", routes);
+app.use("/", routes);
+app.use("*", globalErrorHandler);
 
 app.listen(process.env.PORT, () => {
   console.log(

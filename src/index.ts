@@ -3,12 +3,18 @@ dotenv.config();
 
 import express from "express";
 import "express-async-errors";
+import cors from "cors";
 import routes from "./api/routes/index";
 import { connectDB } from "./config/db";
 import globalErrorHandler from "./api/middlewares/globalErrorHandler";
 
 const app = express();
 app.use(express.json());
+app.use(
+  cors({
+    origin: "*",
+  })
+);
 connectDB();
 
 app.use("/", routes);

@@ -18,5 +18,4 @@ model Merchant {
   address String?
   phone String?
   rating Float?
-  category String? // enum
 }

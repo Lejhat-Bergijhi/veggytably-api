@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 import { BadRequestError } from "../utils/exceptions/BadRequestError";
+import { InternalServerError } from "../utils/exceptions/InternalServerError";
 
 const prisma = new PrismaClient();
 
@@ -9,20 +10,28 @@ export async function registerMerchant({ username, password, email }) {
   if (!username || !password || !email)
     throw new BadRequestError("Invalid data!");
 
-  const duplicateUser = await prisma.merchant.findUnique({
+  const duplicateUsername = await prisma.merchant.findUnique({
     where: {
       username: username,
     },
   });
 
-  if (duplicateUser) throw new Error("Username has already been taken!");
+  if (duplicateUsername)
+    throw new BadRequestError("Username has already been taken!");
+
+  const duplicateEmail = await prisma.merchant.findUnique({
+    where: { email: email },
+  });
+
+  if (duplicateEmail)
+    throw new BadRequestError("Email has already been taken!");
 
   const hashedPassword = await bcrypt.hash(
     password,
     Number(process.env.SALT_ROUNDS)
   );
 
-  const result = await prisma.merchant.create({
+  const userData = await prisma.merchant.create({
     data: {
       username: username,
       password: hashedPassword,
@@ -30,9 +39,14 @@ export async function registerMerchant({ username, password, email }) {
     },
   });
 
-  if (!result) throw new Error("Failed to add new user! Please try again.");
+  if (!userData)
+    throw new InternalServerError("Failed to add new user! Please try again.");
 
-  return result;
+  return {
+    id: userData.id,
+    username: userData.username,
+    email: userData.email,
+  };
 }
 
 export async function loginMerchant({ email, password }) {

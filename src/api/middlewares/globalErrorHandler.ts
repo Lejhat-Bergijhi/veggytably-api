@@ -7,6 +7,7 @@ export default function errorHandler(
   res: Response,
   next: NextFunction
 ) {
+  // TODO: send status code
   res.json({
     errors: serializeErrorMessage(error),
   });

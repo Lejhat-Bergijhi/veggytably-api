@@ -1,9 +1,9 @@
 import { sign } from "jsonwebtoken";
 
-export function createAccessToken({ id, username }) {
+export function createAccessToken({ id, username, role }) {
   // TODO: input type pls
   return sign(
-    { userId: id, username: username },
+    { userId: id, username: username, role: role },
     process.env.ACCESS_TOKEN_SECRET!,
     {
       expiresIn: "15d",

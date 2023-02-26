@@ -1,6 +1,11 @@
 import { Request, Response } from "express";
-import { loginMerchant, registerMerchant } from "../services/authService";
-import { createAccessToken } from "../utils/jwt";
+import {
+  loginMerchant,
+  registerMerchant,
+  revokeRefreshToken,
+  verifyRefreshToken,
+} from "../services/authService";
+import { createAccessToken, createRefreshToken } from "../utils/jwt";
 
 async function signUp(req: Request, res: Response) {
   const user = await registerMerchant(req.body);
@@ -10,10 +15,17 @@ async function signUp(req: Request, res: Response) {
     role: "MERCHANT",
   });
 
+  const refreshToken = createRefreshToken({
+    id: user.id,
+    role: "MERCHANT",
+    tokenVersion: user.tokenVersion,
+  });
+
   res.status(201).json({
     data: {
       user: user,
-      token: accessToken,
+      accessToken: accessToken,
+      refreshToken: refreshToken,
     },
   });
 }
@@ -27,12 +39,47 @@ async function login(req: Request, res: Response) {
     role: "MERCHANT",
   });
 
+  const refreshToken = createRefreshToken({
+    id: user.id,
+    role: "MERCHANT",
+    tokenVersion: user.tokenVersion,
+  });
+
   res.status(200).json({
     data: {
       user: user,
-      token: accessToken,
+      accessToken: accessToken,
+      refreshToken: refreshToken,
     },
   });
 }
 
-export default { signUp, login };
+async function logout(req: Request, res: Response) {
+  // TODO
+  const payload = res.locals.user;
+  const { id } = payload;
+
+  await revokeRefreshToken(id);
+
+  res.status(200).json({
+    message: "Logout success!",
+  });
+}
+
+async function merchantRefreshToken(req: Request, res: Response) {
+  const user = await verifyRefreshToken(req);
+
+  const accessToken = createAccessToken({
+    id: user.id,
+    username: user.username,
+    role: "MERCHANT",
+  });
+
+  res.status(200).json({
+    data: {
+      accessToken: accessToken,
+    },
+  });
+}
+
+export default { signUp, login, logout, merchantRefreshToken };

@@ -6,18 +6,19 @@ export function createAccessToken({ id, username, role }) {
     { userId: id, username: username, role: role },
     process.env.ACCESS_TOKEN_SECRET!,
     {
-      expiresIn: "15d",
+      expiresIn: "1d",
     }
   );
 }
 
-// export function createRefreshToken(user: User) {
-//   const { _id, role, tokenVersion } = user;
-//   return sign(
-//     { userId: _id, role: role, tokenVersion: tokenVersion },
-//     process.env.REFRESH_TOKEN_SECRET!,
-//     {
-//       expiresIn: "7d",
-//     }
-//   );
-// }
+export function createRefreshToken({ id, role, tokenVersion }) {
+  // const { _id, role, tokenVersion } = user;
+  // TODO handle type validation
+  return sign(
+    { userId: id, role: role, tokenVersion: tokenVersion },
+    process.env.REFRESH_TOKEN_SECRET!,
+    {
+      expiresIn: "15d",
+    }
+  );
+}

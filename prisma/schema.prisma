@@ -18,4 +18,5 @@ model Merchant {
   address String?
   phone String?
   rating Float?
+  tokenVersion Int @default(0)
 }

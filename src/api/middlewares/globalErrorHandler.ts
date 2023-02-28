@@ -1,14 +1,13 @@
 import { Request, Response, NextFunction } from "express";
-import { serializeErrorMessage } from "../utils/exceptions";
+import { isCustomError, serializeErrorMessage } from "../utils/exceptions";
 
 export default function errorHandler(
-  error: Error,
+  error: unknown,
   req: Request,
   res: Response,
   next: NextFunction
 ) {
-  // TODO: send status code
-  res.json({
+  res.status(isCustomError(error) ? error.errorCode : 500).json({
     errors: serializeErrorMessage(error),
   });
 }

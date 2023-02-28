@@ -57,9 +57,9 @@ async function login(req: Request, res: Response) {
 async function logout(req: Request, res: Response) {
   // TODO
   const payload = res.locals.user;
-  const { id } = payload;
+  const { userId } = payload;
 
-  await revokeRefreshToken(id);
+  await revokeRefreshToken(userId);
 
   res.status(200).json({
     message: "Logout success!",

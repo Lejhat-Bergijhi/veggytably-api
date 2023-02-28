@@ -14,9 +14,10 @@ model Merchant {
   id String @id @default(auto()) @map("_id") @db.ObjectId
   username String @unique
   email String @unique
+  restaurantName String
+  restaurantAddress String
   password String
-  address String?
-  phone String?
+  phone String
   rating Float?
   tokenVersion Int @default(0)
 }

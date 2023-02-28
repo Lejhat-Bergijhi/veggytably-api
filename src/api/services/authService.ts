@@ -8,7 +8,14 @@ import { UnauthorizedError } from "../utils/exceptions/UnauthorizedError";
 
 const prisma = new PrismaClient();
 
-export async function registerMerchant({ username, password, email }) {
+export async function registerMerchant({
+  username,
+  password,
+  phone,
+  email,
+  restaurantName,
+  restaurantAddress,
+}) {
   // TODO: validate data
   if (!username || !password || !email)
     throw new BadRequestError("Invalid data!");
@@ -39,6 +46,9 @@ export async function registerMerchant({ username, password, email }) {
       username: username,
       password: hashedPassword,
       email: email,
+      phone: phone,
+      restaurantName: restaurantName,
+      restaurantAddress: restaurantAddress,
     },
   });
 

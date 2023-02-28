@@ -9,7 +9,8 @@ export function isUserAuth(req: Request, res: Response, next: NextFunction) {
     throw new BadRequestError("Authorization header not included!");
 
   const token = authorization.split(" ")[1];
-  const payload = verify(token, process.env.ACCESS_TOKEN_SECRET!);
+  // TODO:refresh token or access token
+  const payload = verify(token, process.env.REFRESH_TOKEN_SECRET!);
 
   res.locals.user = payload;
 

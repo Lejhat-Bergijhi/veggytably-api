@@ -9,4 +9,6 @@ router.post("/auth/login", merchantController.login);
 router.post("/auth/logout", isUserAuth, merchantController.logout);
 router.post("/auth/refreshToken", merchantController.merchantRefreshToken);
 
+router.get("/profile", isUserAuth, merchantController.getProfile);
+
 export default router;

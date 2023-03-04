@@ -18,6 +18,6 @@ model Merchant {
   restaurantAddress String
   password String
   phone String
-  rating Float?
+  rating Float? @default(0)
   tokenVersion Int @default(0)
 }

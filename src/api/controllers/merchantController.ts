@@ -6,6 +6,20 @@ import {
   verifyRefreshToken,
 } from "../services/authService";
 import { createAccessToken, createRefreshToken } from "../utils/jwt";
+import { getProfileById } from "../services/merchantService";
+
+async function getProfile(req: Request, res: Response) {
+  const payload = res.locals.user;
+  const { userId } = payload;
+
+  const user = await getProfileById(userId);
+
+  res.status(200).json({
+    data: {
+      user: user,
+    },
+  });
+}
 
 async function signUp(req: Request, res: Response) {
   const user = await registerMerchant(req.body);
@@ -82,4 +96,4 @@ async function merchantRefreshToken(req: Request, res: Response) {
   });
 }
 
-export default { signUp, login, logout, merchantRefreshToken };
+export default { getProfile, signUp, login, logout, merchantRefreshToken };

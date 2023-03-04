@@ -60,6 +60,7 @@ export async function registerMerchant({
     email,
     role: Role.MERCHANT,
   });
+  if (!userData) throw new InternalServerError("Failed to add new user!");
 
   const merchantData = await prisma.merchant.create({
     data: {
@@ -74,7 +75,9 @@ export async function registerMerchant({
   });
 
   if (!merchantData)
-    throw new InternalServerError("Failed to add new user! Please try again.");
+    throw new InternalServerError(
+      "Failed to add new merchant! Please try again."
+    );
 
   return {
     id: userData.id,
@@ -86,13 +89,49 @@ export async function registerMerchant({
   };
 }
 
-export async function registerDriver({}) {
+export async function registerDriver({
+  username,
+  password,
+  phone,
+  email,
+  licensePlate,
+}) {
   // TODO: implement Driver registration
+  const userData = await createUser({
+    username,
+    password,
+    phone,
+    email,
+    role: Role.DRIVER,
+  });
+  if (!userData) throw new InternalServerError("Failed to add new user!");
+
+  const driverData = await prisma.driver.create({
+    data: {
+      user: {
+        connect: {
+          id: userData.id,
+        },
+      },
+      licensePlate: licensePlate,
+    },
+  });
+  if (!driverData) throw new InternalServerError("Failed to add new driver!");
+
+  return {
+    id: userData.id,
+    username: userData.username,
+    email: userData.email,
+    phone: userData.phone,
+    role: userData.role,
+    tokenVersion: userData.tokenVersion,
+  };
 }
 
-export async function login({ email, password }) {
+export async function login({ email, password, role }) {
   // TODO validate data
   if (!email || !password) throw new BadRequestError("Invalid data!");
+  if (!role) throw new BadRequestError("Invalid request!");
 
   const user = await prisma.user.findUnique({
     where: {
@@ -101,6 +140,8 @@ export async function login({ email, password }) {
   });
 
   if (!user) throw new BadRequestError("User not found!");
+
+  if (user.role !== role) throw new BadRequestError("User not found!");
 
   const isMatch = await bcrypt.compare(password, user.password);
 

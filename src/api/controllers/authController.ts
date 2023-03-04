@@ -30,27 +30,27 @@ async function signUpMerchant(req: Request, res: Response) {
   });
 }
 
-// async function signUpDriver(req: Request, res: Response) {
-//   const user = await registerDriver(req.body);
-//   const accessToken = createAccessToken({
-//     id: user.id,
-//     role: user.role,
-//   });
+async function signUpDriver(req: Request, res: Response) {
+  const user = await registerDriver(req.body);
+  const accessToken = createAccessToken({
+    id: user.id,
+    role: user.role,
+  });
 
-//   const refreshToken = createRefreshToken({
-//     id: user.id,
-//     role: user.role,
-//     tokenVersion: user.tokenVersion,
-//   });
+  const refreshToken = createRefreshToken({
+    id: user.id,
+    role: user.role,
+    tokenVersion: user.tokenVersion,
+  });
 
-//   res.status(201).json({
-//     data: {
-//       user: user,
-//       accessToken: accessToken,
-//       refreshToken: refreshToken,
-//     },
-//   });
-// }
+  res.status(201).json({
+    data: {
+      user: user,
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+    },
+  });
+}
 
 async function loginUser(req: Request, res: Response) {
   const user = await login(req.body);
@@ -100,4 +100,10 @@ async function refreshToken(req: Request, res: Response) {
   });
 }
 
-export default { signUpMerchant, loginUser, logout, refreshToken };
+export default {
+  signUpMerchant,
+  signUpDriver,
+  loginUser,
+  logout,
+  refreshToken,
+};

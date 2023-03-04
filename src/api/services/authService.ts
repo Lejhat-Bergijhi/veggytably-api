@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Role } from "@prisma/client";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { BadRequestError } from "../utils/exceptions/BadRequestError";
@@ -8,29 +8,15 @@ import { UnauthorizedError } from "../utils/exceptions/UnauthorizedError";
 
 const prisma = new PrismaClient();
 
-export async function registerMerchant({
-  username,
-  password,
-  phone,
-  email,
-  restaurantName,
-  restaurantAddress,
-}) {
+async function createUser({ username, email, password, phone, role }) {
   // TODO: validate data
-  if (!username || !password || !email)
+  if (!username || !email || !password || !phone || !role)
     throw new BadRequestError("Invalid data!");
 
-  const duplicateUsername = await prisma.merchant.findUnique({
+  const duplicateEmail = await prisma.user.findUnique({
     where: {
-      username: username,
+      email: email,
     },
-  });
-
-  if (duplicateUsername)
-    throw new BadRequestError("Username has already been taken!");
-
-  const duplicateEmail = await prisma.merchant.findUnique({
-    where: { email: email },
   });
 
   if (duplicateEmail)
@@ -41,33 +27,74 @@ export async function registerMerchant({
     Number(process.env.SALT_ROUNDS)
   );
 
-  const userData = await prisma.merchant.create({
+  const user = await prisma.user.create({
     data: {
       username: username,
-      password: hashedPassword,
       email: email,
+      password: hashedPassword,
       phone: phone,
+      role: role,
+    },
+  });
+
+  if (!user)
+    throw new InternalServerError("Failed to add new user! Please try again.");
+
+  const { password: _, ...userData } = user;
+
+  return userData;
+}
+
+export async function registerMerchant({
+  username,
+  password,
+  phone,
+  email,
+  restaurantName,
+  restaurantAddress,
+}) {
+  const userData = await createUser({
+    username,
+    password,
+    phone,
+    email,
+    role: Role.MERCHANT,
+  });
+
+  const merchantData = await prisma.merchant.create({
+    data: {
+      user: {
+        connect: {
+          id: userData.id,
+        },
+      },
       restaurantName: restaurantName,
       restaurantAddress: restaurantAddress,
     },
   });
 
-  if (!userData)
+  if (!merchantData)
     throw new InternalServerError("Failed to add new user! Please try again.");
 
   return {
     id: userData.id,
     username: userData.username,
     email: userData.email,
+    phone: userData.phone,
+    role: userData.role,
     tokenVersion: userData.tokenVersion,
   };
 }
 
-export async function loginMerchant({ email, password }) {
+export async function registerDriver({}) {
+  // TODO: implement Driver registration
+}
+
+export async function login({ email, password }) {
   // TODO validate data
   if (!email || !password) throw new BadRequestError("Invalid data!");
 
-  const user = await prisma.merchant.findUnique({
+  const user = await prisma.user.findUnique({
     where: {
       email: email,
     },
@@ -93,7 +120,7 @@ export async function verifyRefreshToken(req: Request) {
   // TODO: validate payload
   const { userId, tokenVersion } = payload as any;
 
-  const user = await prisma.merchant.findUnique({
+  const user = await prisma.user.findUnique({
     where: {
       id: userId,
     },
@@ -108,7 +135,7 @@ export async function verifyRefreshToken(req: Request) {
 }
 
 export async function revokeRefreshToken(userId: string) {
-  const user = await prisma.merchant.update({
+  const user = await prisma.user.update({
     where: {
       id: userId,
     },

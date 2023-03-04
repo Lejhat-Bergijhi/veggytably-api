@@ -3,13 +3,24 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export async function getProfileById(userId: string) {
-  const user = await prisma.merchant.findUnique({
+  const user = await prisma.user.findUnique({
     where: {
       id: userId,
     },
   });
 
-  const { password, tokenVersion, ...rest } = user;
+  const merchant = await prisma.merchant.findUnique({
+    where: {
+      userId: userId,
+    },
+  });
 
-  return rest;
+  const { password, tokenVersion, role, ...restUser } = user;
+
+  const { userId: _, ...restMerchant } = merchant;
+
+  return {
+    ...restUser,
+    ...restMerchant,
+  };
 }

@@ -10,14 +10,49 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Merchant {
+model User {
   id String @id @default(auto()) @map("_id") @db.ObjectId
-  username String @unique
+  username String
   email String @unique
-  restaurantName String
-  restaurantAddress String
   password String
   phone String
-  rating Float? @default(0)
   tokenVersion Int @default(0)
+
+  role Role @default(CUSTOMER)
+  customer Customer?
+  driver Driver?
+  merchant Merchant?
+}
+
+
+model Customer {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  address String
+  rating Float? @default(0)
+
+  userId String @unique @db.ObjectId
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Merchant {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  restaurantName String
+  restaurantAddress String
+  rating Float? @default(0)
+
+  userId String @unique @db.ObjectId
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Driver {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  userId String @unique @db.ObjectId
+  user User @relation(fields: [userId], references: [id])
+}
+
+enum Role {
+  CUSTOMER
+  MERCHANT
+  DRIVER
 }

@@ -1,14 +1,10 @@
 import { sign } from "jsonwebtoken";
 
-export function createAccessToken({ id, username, role }) {
+export function createAccessToken({ id, role }) {
   // TODO: input type pls
-  return sign(
-    { userId: id, username: username, role: role },
-    process.env.ACCESS_TOKEN_SECRET!,
-    {
-      expiresIn: "1d",
-    }
-  );
+  return sign({ userId: id, role: role }, process.env.ACCESS_TOKEN_SECRET!, {
+    expiresIn: "1d",
+  });
 }
 
 export function createRefreshToken({ id, role, tokenVersion }) {

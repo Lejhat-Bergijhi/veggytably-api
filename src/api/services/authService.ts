@@ -95,6 +95,7 @@ export async function registerDriver({
   phone,
   email,
   licensePlate,
+  vehicleType,
 }) {
   // TODO: implement Driver registration
   const userData = await createUser({
@@ -114,6 +115,7 @@ export async function registerDriver({
         },
       },
       licensePlate: licensePlate,
+      vehicleType: vehicleType,
     },
   });
   if (!driverData) throw new InternalServerError("Failed to add new driver!");

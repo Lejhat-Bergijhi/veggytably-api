@@ -191,3 +191,28 @@ export async function revokeRefreshToken(userId: string) {
 
   if (!user) throw new BadRequestError("User not found!");
 }
+
+export async function storeProfilePicture(imageData: Buffer, userId: string) {
+  const user = await prisma.user.update({
+    where: {
+      id: userId,
+    },
+    data: {
+      profilePicture: imageData,
+    },
+  });
+
+  if (!user) throw new BadRequestError("User not found!");
+}
+
+export async function getProfilePicture(userId: string) {
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+  });
+
+  if (!user) throw new BadRequestError("User not found!");
+
+  return user.profilePicture;
+}

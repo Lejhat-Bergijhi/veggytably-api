@@ -15,7 +15,7 @@ export async function getProfileById(userId: string) {
     },
   });
 
-  const { password, tokenVersion, role, ...restUser } = user;
+  const { password, tokenVersion, role, profilePicture, ...restUser } = user;
 
   const { userId: _, ...restMerchant } = merchant;
 

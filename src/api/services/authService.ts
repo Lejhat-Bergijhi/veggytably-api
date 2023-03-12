@@ -97,7 +97,6 @@ export async function registerDriver({
   licensePlate,
   vehicleType,
 }) {
-  // TODO: implement Driver registration
   const userData = await createUser({
     username,
     password,
@@ -130,6 +129,38 @@ export async function registerDriver({
   };
 }
 
+export async function registerCustomer({ username, password, phone, email }) {
+  const userData = await createUser({
+    username,
+    password,
+    phone,
+    email,
+    role: Role.CUSTOMER,
+  });
+  if (!userData) throw new InternalServerError("Failed to add new user!");
+
+  const customerData = await prisma.customer.create({
+    data: {
+      user: {
+        connect: {
+          id: userData.id,
+        },
+      },
+    },
+  });
+  if (!customerData)
+    throw new InternalServerError("Failed to add new customer!");
+
+  return {
+    id: userData.id,
+    username: userData.username,
+    email: userData.email,
+    phone: userData.phone,
+    role: userData.role,
+    tokenVersion: userData.tokenVersion,
+  };
+}
+
 export async function login({ email, password, role }) {
   // TODO validate data
   if (!email || !password) throw new BadRequestError("Invalid data!");
@@ -148,6 +179,18 @@ export async function login({ email, password, role }) {
   const isMatch = await bcrypt.compare(password, user.password);
 
   if (!isMatch) throw new BadRequestError("Invalid credentials!");
+
+  return user;
+}
+
+export async function verifyCredentials(userId: string) {
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+  });
+
+  if (!user) throw new BadRequestError("User not found!");
 
   return user;
 }

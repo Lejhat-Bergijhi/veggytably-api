@@ -3,10 +3,12 @@ import {
   login,
   registerMerchant,
   registerDriver,
+  registerCustomer,
   revokeRefreshToken,
   verifyRefreshToken,
   storeProfilePicture,
   getProfilePicture,
+  verifyCredentials,
 } from "../services/authService";
 import { createAccessToken, createRefreshToken } from "../utils/jwt";
 import compressImage from "../utils/compressImage";
@@ -35,6 +37,28 @@ async function signUpMerchant(req: Request, res: Response) {
 
 async function signUpDriver(req: Request, res: Response) {
   const user = await registerDriver(req.body);
+  const accessToken = createAccessToken({
+    id: user.id,
+    role: user.role,
+  });
+
+  const refreshToken = createRefreshToken({
+    id: user.id,
+    role: user.role,
+    tokenVersion: user.tokenVersion,
+  });
+
+  res.status(201).json({
+    data: {
+      user: user,
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+    },
+  });
+}
+
+async function signUpCustomer(req: Request, res: Response) {
+  const user = await registerCustomer(req.body);
   const accessToken = createAccessToken({
     id: user.id,
     role: user.role,
@@ -90,6 +114,22 @@ async function logout(req: Request, res: Response) {
   });
 }
 
+async function verifyAuth(req: Request, res: Response) {
+  const payload = res.locals.user;
+
+  const { userId } = payload;
+
+  const user = await verifyCredentials(userId);
+
+  const { password, tokenVersion, profilePicture, ...rest } = user;
+
+  res.status(200).json({
+    data: {
+      user: rest,
+    },
+  });
+}
+
 async function refreshToken(req: Request, res: Response) {
   const user = await verifyRefreshToken(req);
 
@@ -141,9 +181,11 @@ async function fetchProfilePicture(req: Request, res: Response) {
 export default {
   signUpMerchant,
   signUpDriver,
+  signUpCustomer,
   loginUser,
   logout,
   refreshToken,
+  verifyAuth,
   uploadProfilePicture,
   fetchProfilePicture,
 };

@@ -53,6 +53,11 @@ model Driver {
   user User @relation(fields: [userId], references: [id])
 }
 
+model MenuImage {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  image Bytes
+}
+
 enum Role {
   CUSTOMER
   MERCHANT

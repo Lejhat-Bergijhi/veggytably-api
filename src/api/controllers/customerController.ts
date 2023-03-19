@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { getProfileById } from "../services/merchantService";
 import { updateCustomerProfile } from "../services/customerService";
 
 async function updateProfile(req: Request, res: Response) {

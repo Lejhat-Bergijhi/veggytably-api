@@ -1,13 +1,14 @@
 import sharp from "sharp";
 
-// Define the maximum size in bytes
-const MAX_SIZE = 200 * 1024; // 200 kb
-
-async function compressImage(bufferImage: Buffer) {
+// default max size = 200kb
+const compressImage = async (
+  bufferImage: Buffer,
+  MAX_SIZE: number = 200 * 1024
+) => {
   // Check if the file size exceeds the maximum size
   if (bufferImage.length > MAX_SIZE) {
-    let quality = 80; // Initial quality setting
     let compressedImage = null;
+    let quality = 100; // Initial quality setting
 
     // Adjust the quality setting until the resulting compressed image is below 1 MB
     do {
@@ -20,9 +21,11 @@ async function compressImage(bufferImage: Buffer) {
         quality -= 10;
       }
     } while (compressedImage.info.size > MAX_SIZE && quality >= 10);
-
     return compressedImage.data;
   }
-}
+
+  // if the image is smaller than the max size, return the original image
+  return bufferImage;
+};
 
 export default compressImage;

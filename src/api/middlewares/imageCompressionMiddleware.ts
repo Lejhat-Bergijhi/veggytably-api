@@ -1,5 +1,6 @@
 import sharp from "sharp";
 import { Request, Response, NextFunction } from "express";
+import { BadRequestError } from "../utils/exceptions/BadRequestError";
 
 // Define the maximum size in bytes
 const MAX_SIZE = 1024 * 1024; // 1MB

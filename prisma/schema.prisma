@@ -34,16 +34,6 @@ model Customer {
   user User @relation(fields: [userId], references: [id])
 }
 
-model Merchant {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  restaurantName String
-  restaurantAddress String
-  rating Float? @default(0)
-
-  userId String @unique @db.ObjectId
-  user User @relation(fields: [userId], references: [id])
-}
-
 model Driver {
   id String @id @default(auto()) @map("_id") @db.ObjectId
   licensePlate String @unique
@@ -53,10 +43,40 @@ model Driver {
   user User @relation(fields: [userId], references: [id])
 }
 
+model Merchant {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  restaurantName String
+  restaurantAddress String
+  rating Float? @default(0)
+
+  userId String @unique @db.ObjectId
+  user User @relation(fields: [userId], references: [id])
+  menu Menu[]
+}
+
+
+model Menu {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  name String
+  price Float
+  description String?
+
+  imageId String? @db.ObjectId
+  image MenuImage? @relation(fields: [imageId], references: [id])
+
+  merchantId String @db.ObjectId
+  merchant Merchant @relation(fields: [merchantId], references: [id])
+
+  // TODO: add restrictions
+}
+
 model MenuImage {
   id String @id @default(auto()) @map("_id") @db.ObjectId
   image Bytes
+
+  menu Menu[]
 }
+
 
 enum Role {
   CUSTOMER

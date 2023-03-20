@@ -1,12 +1,22 @@
 import { Request, Response } from "express";
 import {
+  createMenu,
+  deleteMenuById,
+  deleteMenuImageById,
+  findMenu,
+  findMenuById,
   findMenuImage,
   getProfileById,
+  updateMenu,
   updateProfileById,
   uploadImage,
 } from "../services/merchantService";
 import compressImage from "../utils/compressImage";
+import { imageIdToUrl } from "../utils/imageUrl";
 
+/**
+ *  @controller profile
+ */
 async function getProfile(req: Request, res: Response) {
   const payload = res.locals.user;
   const { userId } = payload;
@@ -42,29 +52,107 @@ async function updateProfile(req: Request, res: Response) {
   });
 }
 
-async function uploadMenuImage(req: Request, res: Response) {
-  const { file } = req;
+/**
+ *  @controller Menu
+ *  @desc CRUD menu
+ */
+async function getManyMenu(req: Request, res: Response) {
+  const payload = res.locals.user;
+  const { userId } = payload;
 
-  const menuImage = await uploadImage(file.buffer);
+  const menuList = await findMenu(userId);
 
-  // create image url
-  const imageUrl = `${req.protocol}://${req.get(
-    "host"
-  )}/merchants/menu/images/${menuImage.id}`;
+  // include image url to list
+  const menuListWithImageUrl = menuList.map((menu) => {
+    const imageUrl = imageIdToUrl(menu.imageId, req);
+
+    return {
+      ...menu,
+      imageUrl: imageUrl,
+    };
+  });
 
   res.status(200).json({
     data: {
-      imageUrl: imageUrl,
+      menuList: menuListWithImageUrl,
     },
   });
 }
 
+async function getOneMenu(req: Request, res: Response) {
+  const { menuId } = req.params;
+
+  const menu = await findMenuById(menuId);
+
+  const imageUrl = imageIdToUrl(menu.imageId, req);
+
+  res.status(200).json({
+    data: {
+      menu: {
+        ...menu,
+        imageUrl: imageUrl,
+      },
+    },
+  });
+}
+
+async function postMenu(req: Request, res: Response) {
+  const payload = res.locals.user;
+  const { userId } = payload;
+
+  const menu = await createMenu(userId, req.body);
+
+  const imageUrl = imageIdToUrl(menu.imageId, req);
+
+  res.status(201).json({
+    data: {
+      menu: {
+        ...menu,
+        imageUrl: imageUrl,
+      },
+    },
+  });
+}
+
+async function putMenu(req: Request, res: Response) {
+  const { menuId } = req.params;
+
+  const menu = await updateMenu(menuId, req.body);
+
+  const imageUrl = imageIdToUrl(menu.imageId, req);
+
+  res.status(201).json({
+    data: {
+      menu: {
+        ...menu,
+        imageUrl: imageUrl,
+      },
+    },
+  });
+}
+
+async function deleteMenu(req: Request, res: Response) {
+  const { menuId } = req.params;
+
+  await deleteMenuById(menuId);
+
+  res.status(200).json({
+    data: {
+      message: "Menu deleted!",
+    },
+  });
+}
+
+/**
+ *  @controller Menu Image
+ *  @desc get, post, delete menu image
+ */
 async function getMenuImage(req: Request, res: Response) {
   const { imageId } = req.params;
 
   const buffer = await findMenuImage(imageId);
 
-  const compressedBuffer = await compressImage(buffer, 10 * 1024);
+  const compressedBuffer = await compressImage(buffer, 100 * 1024);
   console.log(compressedBuffer.length);
   // set content type in headers
   res.set("Content-Type", "image/jpeg");
@@ -74,9 +162,43 @@ async function getMenuImage(req: Request, res: Response) {
   res.end();
 }
 
+async function uploadMenuImage(req: Request, res: Response) {
+  const { file } = req;
+
+  const menuImage = await uploadImage(file.buffer);
+
+  // create image url
+  const imageUrl = imageIdToUrl(menuImage.id, req);
+
+  res.status(200).json({
+    data: {
+      imageId: menuImage.id,
+      imageUrl: imageUrl,
+    },
+  });
+}
+
+async function deleteMenuImage(req: Request, res: Response) {
+  const { imageId } = req.params;
+
+  await deleteMenuImageById(imageId);
+
+  res.status(200).json({
+    data: {
+      message: "Image successfully deleted!",
+    },
+  });
+}
+
 export default {
   getProfile,
   updateProfile,
-  uploadMenuImage,
+  getOneMenu,
+  getManyMenu,
+  postMenu,
+  putMenu,
+  deleteMenu,
   getMenuImage,
+  uploadMenuImage,
+  deleteMenuImage,
 };

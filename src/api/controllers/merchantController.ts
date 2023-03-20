@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import {
   findMenuImage,
   getProfileById,
+  updateProfileById,
   uploadImage,
 } from "../services/merchantService";
 import compressImage from "../utils/compressImage";
@@ -10,11 +11,33 @@ async function getProfile(req: Request, res: Response) {
   const payload = res.locals.user;
   const { userId } = payload;
 
-  const user = await getProfileById(userId);
+  const merchant = await getProfileById(userId);
 
   res.status(200).json({
     data: {
-      user: user,
+      merchant: merchant,
+    },
+  });
+}
+
+async function updateProfile(req: Request, res: Response) {
+  const payload = res.locals.user;
+  const { userId } = payload;
+  const { username, email, phone, restaurantName, restaurantAddress } =
+    req.body;
+
+  const merchant = await updateProfileById(
+    userId,
+    username,
+    email,
+    phone,
+    restaurantName,
+    restaurantAddress
+  );
+
+  res.status(200).json({
+    data: {
+      merchant: merchant,
     },
   });
 }
@@ -53,6 +76,7 @@ async function getMenuImage(req: Request, res: Response) {
 
 export default {
   getProfile,
+  updateProfile,
   uploadMenuImage,
   getMenuImage,
 };

@@ -26,6 +26,45 @@ export async function getProfileById(userId: string) {
   };
 }
 
+export async function updateProfileById(
+  userId: string,
+  username: string,
+  email: string,
+  phone: string,
+  restaurantName: string,
+  restaurantAddress: string
+) {
+  const user = await prisma.user.update({
+    where: {
+      id: userId,
+    },
+    data: {
+      username: username,
+      email: email,
+      phone: phone,
+    },
+  });
+
+  const merchant = await prisma.merchant.update({
+    where: {
+      userId: userId,
+    },
+    data: {
+      restaurantAddress: restaurantAddress,
+      restaurantName: restaurantName,
+    },
+  });
+
+  const { password, tokenVersion, role, profilePicture, ...restUser } = user;
+
+  const { userId: _, ...restMerchant } = merchant;
+
+  return {
+    ...restUser,
+    ...restMerchant,
+  };
+}
+
 export async function uploadImage(image: Buffer) {
   const menuImage = await prisma.menuImage.create({
     data: {

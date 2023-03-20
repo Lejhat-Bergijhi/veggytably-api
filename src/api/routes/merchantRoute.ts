@@ -10,6 +10,7 @@ import isImageFile from "../middlewares/isImageMiddleware";
 const upload = multer();
 
 router.get("/profile", isUserAuth, merchantController.getProfile);
+router.put("/profile", isUserAuth, merchantController.updateProfile);
 
 router.put(
   "/menu/upload-image",

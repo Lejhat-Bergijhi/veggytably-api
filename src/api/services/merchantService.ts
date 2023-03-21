@@ -160,6 +160,7 @@ export async function updateMenu(
       price: price,
       description: description,
       imageId: imageId,
+      inStock: inStock,
     },
   });
 

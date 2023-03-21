@@ -60,6 +60,7 @@ model Menu {
   name String
   price Float
   description String?
+  inStock Boolean @default(true)
 
   imageId String? @db.ObjectId
   image MenuImage? @relation(fields: [imageId], references: [id])

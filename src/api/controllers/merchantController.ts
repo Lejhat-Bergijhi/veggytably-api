@@ -121,7 +121,7 @@ async function putMenu(req: Request, res: Response) {
 
   const imageUrl = imageIdToUrl(menu.imageId, req);
 
-  res.status(201).json({
+  res.status(200).json({
     data: {
       menu: {
         ...menu,
@@ -152,7 +152,7 @@ async function getMenuImage(req: Request, res: Response) {
 
   const buffer = await findMenuImage(imageId);
 
-  const compressedBuffer = await compressImage(buffer, 100 * 1024);
+  const compressedBuffer = await compressImage(buffer, 10 * 1024);
   console.log(compressedBuffer.length);
   // set content type in headers
   res.set("Content-Type", "image/jpeg");

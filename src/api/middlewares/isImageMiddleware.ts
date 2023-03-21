@@ -7,7 +7,8 @@ const MAX_SIZE = 1024 * 1024; // 1MB
 
 async function isImageFile(req: Request, res: Response, next: NextFunction) {
   try {
-    if (req.file && req.file.buffer && req.file.mimetype.startsWith("image/")) {
+    // if (req.file && req.file.buffer && req.file.mimetype.startsWith("image/")) {
+    if (req.file && req.file.buffer) {
       // Check if the request is for an image file
       sharp(req.file.buffer);
     } else {

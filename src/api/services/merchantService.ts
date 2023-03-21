@@ -73,11 +73,13 @@ export async function createMenu(
     price,
     description,
     imageId,
+    inStock,
   }: {
     name: string;
     price: number;
     description: string;
     imageId: string | undefined;
+    inStock: boolean | undefined;
   }
 ) {
   // find merchant by userId
@@ -94,6 +96,7 @@ export async function createMenu(
       description: description,
       imageId: imageId,
       merchantId: merchant.id,
+      inStock: inStock,
     },
   });
 
@@ -137,11 +140,13 @@ export async function updateMenu(
     price,
     description,
     imageId,
+    inStock,
   }: {
     name: string;
     price: number;
     description: string;
     imageId: string;
+    inStock: boolean | undefined;
   }
 ) {
   await menuExists(menuId);

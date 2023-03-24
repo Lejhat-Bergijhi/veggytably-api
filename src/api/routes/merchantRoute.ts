@@ -22,6 +22,14 @@ router.get("/profile", isUserAuth, merchantController.getProfile);
 router.put("/profile", isUserAuth, merchantController.updateProfile);
 
 /**
+ * @route    /merchants/:merchantId/menu/:menuId
+ * @desc     public route
+ * @access   public
+ */
+router.get("/:merchantId/menu/", merchantController.getPublicMenu);
+router.get("/:merchantId/menu/:menuId");
+
+/**
  * @route    /merchants/menu/:menuId
  * @desc     get, create, update, delete menu
  * @access   private merchant only

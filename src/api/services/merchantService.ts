@@ -1,7 +1,10 @@
 import { PrismaClient } from "@prisma/client";
 import { InternalServerError } from "../utils/exceptions/InternalServerError";
 import { BadRequestError } from "../utils/exceptions/BadRequestError";
-import { decodeRestriction } from "../utils/restrictions";
+import {
+  decodeRestriction,
+  filterMenuByRestriction,
+} from "../utils/restrictions";
 
 const prisma = new PrismaClient();
 
@@ -134,7 +137,28 @@ export async function findMenuById(menuId: string) {
   };
 }
 
-export async function findMenu(userId: string) {
+export async function findMenuByMerchantId(
+  merchantId: string,
+  limit = 10,
+  offset = 0,
+  restrictions: boolean[] = [false, false, false, false, false, false]
+) {
+  const menus = await prisma.menu.findMany({
+    where: {
+      merchantId: merchantId,
+    },
+  });
+
+  // filter restrictions
+  const filteredMenus = filterMenuByRestriction(menus, restrictions);
+
+  // filter limit and offset
+  const slicedMenus = filteredMenus.slice(offset, offset + limit);
+
+  return slicedMenus;
+}
+
+export async function findMenuByUserId(userId: string) {
   const merchant = await prisma.merchant.findUnique({
     where: {
       userId: userId,

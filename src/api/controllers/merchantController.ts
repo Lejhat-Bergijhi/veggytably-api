@@ -3,17 +3,21 @@ import {
   createMenu,
   deleteMenuById,
   deleteMenuImageById,
-  findMenu,
+  findMenuByUserId,
   findMenuById,
   findMenuImage,
   getProfileById,
   updateMenu,
   updateProfileById,
   uploadImage,
+  findMenuByMerchantId,
 } from "../services/merchantService";
 import compressImage from "../utils/compressImage";
 import { imageIdToUrl } from "../utils/imageUrl";
-import { decodeRestriction } from "../utils/restrictions";
+import {
+  binaryStringToBooleanArray,
+  decodeRestriction,
+} from "../utils/restrictions";
 
 /**
  *  @controller profile
@@ -54,6 +58,47 @@ async function updateProfile(req: Request, res: Response) {
 }
 
 /**
+ *  @controller public menu query
+ *  @desc read only public menu
+ */
+
+async function getPublicMenu(req: Request, res: Response) {
+  /**
+   * @route GET /:merchantId/menu?limit=10&offset=0
+   */
+  const { merchantId } = req.params;
+
+  const { limit, offset, restrictions } = req.query;
+
+  const decodedRestriction = binaryStringToBooleanArray(restrictions as string);
+
+  const menuList = await findMenuByMerchantId(
+    merchantId,
+    limit ? Number(limit) : undefined,
+    offset ? Number(offset) : undefined,
+    decodedRestriction
+  );
+
+  // decode restrictions
+  const menuListWithDecodedRestrictions = menuList.map((menu) => {
+    const decodedRestrictions = decodeRestriction(menu.restrictions);
+
+    const { restrictions, ...rest } = menu;
+
+    return {
+      ...rest,
+      restrictions: decodedRestrictions,
+    };
+  });
+
+  res.status(200).json({
+    data: {
+      menuList: menuListWithDecodedRestrictions,
+    },
+  });
+}
+
+/**
  *  @controller Menu
  *  @desc CRUD menu
  */
@@ -61,7 +106,7 @@ async function getManyMenu(req: Request, res: Response) {
   const payload = res.locals.user;
   const { userId } = payload;
 
-  const menuList = await findMenu(userId);
+  const menuList = await findMenuByUserId(userId);
 
   // include image url to list
   const menuListWithImageUrl = menuList.map((menu) => {
@@ -200,6 +245,7 @@ async function deleteMenuImage(req: Request, res: Response) {
 export default {
   getProfile,
   updateProfile,
+  getPublicMenu,
   getOneMenu,
   getManyMenu,
   postMenu,

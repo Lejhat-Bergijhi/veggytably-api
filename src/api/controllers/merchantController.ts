@@ -11,6 +11,7 @@ import {
   updateProfileById,
   uploadImage,
   findMenuByMerchantId,
+  findMerchant,
 } from "../services/merchantService";
 import compressImage from "../utils/compressImage";
 import { imageIdToUrl } from "../utils/imageUrl";
@@ -61,6 +62,25 @@ async function updateProfile(req: Request, res: Response) {
  *  @controller public menu query
  *  @desc read only public menu
  */
+
+async function getMerchantList(req: Request, res: Response) {
+  const { limit, offset, search } = req.query;
+
+  const merchantList = await findMerchant(
+    limit ? Number(limit) : undefined,
+    offset ? Number(offset) : undefined,
+    typeof search === "string" ? search : undefined
+  );
+
+  res.status(200).json({
+    data: {
+      merchantList: merchantList,
+    },
+  });
+}
+
+// TODO: menu list
+async function getMenuList(req: Request, res: Response) {}
 
 async function getPublicMenu(req: Request, res: Response) {
   /**
@@ -245,6 +265,7 @@ async function deleteMenuImage(req: Request, res: Response) {
 export default {
   getProfile,
   updateProfile,
+  getMerchantList,
   getPublicMenu,
   getOneMenu,
   getManyMenu,

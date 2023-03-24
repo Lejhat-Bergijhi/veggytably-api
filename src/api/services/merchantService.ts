@@ -117,6 +117,35 @@ export async function createMenu(
   return menu;
 }
 
+export async function findMerchant(limit = 10, offset = 0, search = "") {
+  if (search.length < 3) return [];
+
+  const merchants = await prisma.merchant.findMany({
+    where: {
+      restaurantName: {
+        contains: search,
+        mode: "insensitive",
+      },
+    },
+    skip: offset,
+    take: limit,
+  });
+
+  // add random price and estimated duration to each merchant
+  const merchantsWithPriceAndDuration = merchants.map((merchant) => {
+    const randomPrice = (Math.floor(Math.random() * 100) + 1) * 1000;
+    const randomDuration = Math.floor(Math.random() * 60) + 1;
+
+    return {
+      ...merchant,
+      price: randomPrice,
+      duration: randomDuration,
+    };
+  });
+
+  return merchantsWithPriceAndDuration;
+}
+
 export async function findMenuById(menuId: string) {
   const menu = await prisma.menu.findUnique({
     where: {

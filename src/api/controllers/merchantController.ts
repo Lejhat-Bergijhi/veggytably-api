@@ -13,6 +13,7 @@ import {
 } from "../services/merchantService";
 import compressImage from "../utils/compressImage";
 import { imageIdToUrl } from "../utils/imageUrl";
+import { decodeRestriction } from "../utils/restrictions";
 
 /**
  *  @controller profile
@@ -66,8 +67,14 @@ async function getManyMenu(req: Request, res: Response) {
   const menuListWithImageUrl = menuList.map((menu) => {
     const imageUrl = imageIdToUrl(menu.imageId, req);
 
+    // decode restrictions
+    const decodedRestrictions = decodeRestriction(menu.restrictions);
+
+    const { restrictions, ...rest } = menu;
+
     return {
-      ...menu,
+      ...rest,
+      restrictions: decodedRestrictions,
       imageUrl: imageUrl,
     };
   });

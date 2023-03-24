@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { InternalServerError } from "../utils/exceptions/InternalServerError";
 import { BadRequestError } from "../utils/exceptions/BadRequestError";
+import { decodeRestriction } from "../utils/restrictions";
 
 const prisma = new PrismaClient();
 
@@ -74,14 +75,21 @@ export async function createMenu(
     description,
     imageId,
     inStock,
+    restrictions,
   }: {
     name: string;
     price: number;
     description: string;
     imageId: string | undefined;
     inStock: boolean | undefined;
+    restrictions: boolean[] | undefined;
   }
 ) {
+  // check if name, price is empty
+  if (!name || !price) throw new BadRequestError("Invalid input");
+  if (restrictions.length !== 6)
+    throw new BadRequestError("Invalid restrictions input");
+
   // find merchant by userId
   const merchant = await prisma.merchant.findUnique({
     where: {
@@ -97,6 +105,7 @@ export async function createMenu(
       imageId: imageId,
       merchantId: merchant.id,
       inStock: inStock,
+      restrictions: restrictions,
     },
   });
 
@@ -114,7 +123,15 @@ export async function findMenuById(menuId: string) {
 
   if (!menu) throw new BadRequestError("Menu not found!");
 
-  return menu;
+  // decode restrictions array to object
+  const restrictions = decodeRestriction(menu.restrictions);
+
+  const { merchantId, ...restMenu } = menu;
+
+  return {
+    ...restMenu,
+    restrictions,
+  };
 }
 
 export async function findMenu(userId: string) {
@@ -124,13 +141,13 @@ export async function findMenu(userId: string) {
     },
   });
 
-  const menu = await prisma.menu.findMany({
+  const menus = await prisma.menu.findMany({
     where: {
       merchantId: merchant.id,
     },
   });
 
-  return menu;
+  return menus;
 }
 
 export async function updateMenu(
@@ -141,14 +158,20 @@ export async function updateMenu(
     description,
     imageId,
     inStock,
+    restrictions,
   }: {
     name: string;
     price: number;
     description: string;
     imageId: string;
     inStock: boolean | undefined;
+    restrictions: boolean[] | undefined;
   }
 ) {
+  if (!name || !price) throw new BadRequestError("Invalid input");
+  if (restrictions?.length !== 6)
+    throw new BadRequestError("Invalid restrictions input");
+
   await menuExists(menuId);
 
   const menu = await prisma.menu.update({
@@ -161,6 +184,7 @@ export async function updateMenu(
       description: description,
       imageId: imageId,
       inStock: inStock,
+      restrictions: restrictions,
     },
   });
 

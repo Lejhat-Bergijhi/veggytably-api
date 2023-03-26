@@ -146,6 +146,32 @@ export async function findMerchant(limit = 10, offset = 0, search = "") {
   return merchantsWithPriceAndDuration;
 }
 
+export async function searchMenu(
+  limit = 10,
+  offset = 0,
+  search = "",
+  restrictions: boolean[] = [false, false, false, false, false, false]
+) {
+  // if (search.length < 3) return [];
+
+  const menus = await prisma.menu.findMany({
+    where: {
+      name: {
+        contains: search,
+        mode: "insensitive",
+      },
+    },
+  });
+
+  // filter restrictions
+  const filteredMenus = filterMenuByRestriction(menus, restrictions);
+
+  // filter limit and offset
+  const slicedMenus = filteredMenus.slice(offset, offset + limit);
+
+  return slicedMenus;
+}
+
 export async function findMenuById(menuId: string) {
   const menu = await prisma.menu.findUnique({
     where: {

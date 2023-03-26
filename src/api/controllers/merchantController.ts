@@ -12,6 +12,7 @@ import {
   uploadImage,
   findMenuByMerchantId,
   findMerchant,
+  searchMenu,
 } from "../services/merchantService";
 import compressImage from "../utils/compressImage";
 import { imageIdToUrl } from "../utils/imageUrl";
@@ -80,7 +81,24 @@ async function getMerchantList(req: Request, res: Response) {
 }
 
 // TODO: menu list
-async function getMenuList(req: Request, res: Response) {}
+async function getMenuList(req: Request, res: Response) {
+  const { limit, offset, search, restrictions } = req.query;
+
+  const menuList = await searchMenu(
+    limit ? Number(limit) : undefined,
+    offset ? Number(offset) : undefined,
+    typeof search === "string" ? search : undefined,
+    restrictions
+      ? binaryStringToBooleanArray(restrictions as string)
+      : undefined
+  );
+
+  res.status(200).json({
+    data: {
+      menuList: menuList,
+    },
+  });
+}
 
 async function getPublicMenu(req: Request, res: Response) {
   /**
@@ -267,6 +285,7 @@ export default {
   updateProfile,
   getMerchantList,
   getPublicMenu,
+  getMenuList,
   getOneMenu,
   getManyMenu,
   postMenu,

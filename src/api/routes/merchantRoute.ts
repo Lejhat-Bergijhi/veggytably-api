@@ -27,7 +27,7 @@ router.put("/profile", isUserAuth, merchantController.updateProfile);
  * @access   public
  */
 router.get("/", merchantController.getMerchantList); // query merchant list
-router.get("/menu/query"); // query menu list by title
+router.get("/menu/query", merchantController.getMenuList); // query menu list by title
 router.get("/:merchantId/menu/", merchantController.getPublicMenu);
 router.get("/:merchantId/menu/:menuId");
 

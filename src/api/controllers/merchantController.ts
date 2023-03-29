@@ -90,7 +90,8 @@ async function getMenuList(req: Request, res: Response) {
     typeof search === "string" ? search : undefined,
     restrictions
       ? binaryStringToBooleanArray(restrictions as string)
-      : undefined
+      : undefined,
+    req
   );
 
   res.status(200).json({
@@ -114,24 +115,25 @@ async function getPublicMenu(req: Request, res: Response) {
     merchantId,
     limit ? Number(limit) : undefined,
     offset ? Number(offset) : undefined,
-    decodedRestriction
+    decodedRestriction,
+    req
   );
 
-  // decode restrictions
-  const menuListWithDecodedRestrictions = menuList.map((menu) => {
-    const decodedRestrictions = decodeRestriction(menu.restrictions);
+  // TODO: decode restrictions
+  // const menuListWithDecodedRestrictions = menuList.map((menu) => {
+  //   const decodedRestrictions = decodeRestriction(menu.restrictions);
 
-    const { restrictions, ...rest } = menu;
+  //   const { restrictions, ...rest } = menu;
 
-    return {
-      ...rest,
-      restrictions: decodedRestrictions,
-    };
-  });
+  //   return {
+  //     ...rest,
+  //     restrictions: decodedRestrictions,
+  //   };
+  // });
 
   res.status(200).json({
     data: {
-      menuList: menuListWithDecodedRestrictions,
+      menuList: menuList,
     },
   });
 }

@@ -1,10 +1,12 @@
 import { PrismaClient } from "@prisma/client";
 import { InternalServerError } from "../utils/exceptions/InternalServerError";
 import { BadRequestError } from "../utils/exceptions/BadRequestError";
+import { Request } from "express";
 import {
   decodeRestriction,
   filterMenuByRestriction,
 } from "../utils/restrictions";
+import { imageIdToUrl } from "../utils/imageUrl";
 
 const prisma = new PrismaClient();
 
@@ -150,7 +152,8 @@ export async function searchMenu(
   limit = 10,
   offset = 0,
   search = "",
-  restrictions: boolean[] = [false, false, false, false, false, false]
+  restrictions: boolean[] = [false, false, false, false, false, false],
+  req: Request
 ) {
   // if (search.length < 3) return [];
 
@@ -169,7 +172,15 @@ export async function searchMenu(
   // filter limit and offset
   const slicedMenus = filteredMenus.slice(offset, offset + limit);
 
-  return slicedMenus;
+  // append image url
+  const menusWithImageUrl = slicedMenus.map((menu) => {
+    return {
+      ...menu,
+      imageUrl: imageIdToUrl(menu.imageId, req),
+    };
+  });
+
+  return menusWithImageUrl;
 }
 
 export async function findMenuById(menuId: string) {
@@ -196,7 +207,8 @@ export async function findMenuByMerchantId(
   merchantId: string,
   limit = 10,
   offset = 0,
-  restrictions: boolean[] = [false, false, false, false, false, false]
+  restrictions: boolean[] = [false, false, false, false, false, false],
+  req: Request
 ) {
   const menus = await prisma.menu.findMany({
     where: {
@@ -210,7 +222,15 @@ export async function findMenuByMerchantId(
   // filter limit and offset
   const slicedMenus = filteredMenus.slice(offset, offset + limit);
 
-  return slicedMenus;
+  // append image url
+  const menusWithImageUrl = slicedMenus.map((menu) => {
+    return {
+      ...menu,
+      imageUrl: imageIdToUrl(menu.imageId, req),
+    };
+  });
+
+  return menusWithImageUrl;
 }
 
 export async function findMenuByUserId(userId: string) {

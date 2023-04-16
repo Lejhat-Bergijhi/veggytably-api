@@ -35,6 +35,8 @@ model Customer {
   
   userId String @unique @db.ObjectId
   user User @relation(fields: [userId], references: [id])
+
+  cart Cart[]
 }
 
 model Driver {
@@ -55,6 +57,7 @@ model Merchant {
   userId String @unique @db.ObjectId
   user User @relation(fields: [userId], references: [id])
   menu Menu[]
+  cart Cart[]
 }
 
 
@@ -71,6 +74,8 @@ model Menu {
 
   merchantId String @db.ObjectId
   merchant Merchant @relation(fields: [merchantId], references: [id])
+
+  cartItem CartItem[]
 }
 
 model MenuImage {
@@ -78,6 +83,33 @@ model MenuImage {
   image Bytes
 
   menu Menu[]
+}
+
+model Cart {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  cartItem CartItem[]
+  
+  customerId String @db.ObjectId
+  customer Customer @relation(fields: [customerId], references: [id])
+
+  merchantId String @db.ObjectId
+  merchant Merchant @relation(fields: [merchantId], references: [id])
+
+  @@unique([customerId, merchantId])
+}
+
+model CartItem{
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  quantity Int @default(1)
+
+  cartId String @db.ObjectId
+  cart Cart @relation(fields: [cartId], references: [id])
+
+  menuId String @db.ObjectId
+  menu Menu @relation(fields: [menuId], references: [id])
+
+  @@unique([cartId, menuId])
 }
 
 enum Role {

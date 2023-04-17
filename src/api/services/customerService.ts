@@ -61,7 +61,11 @@ export async function getCartUnique(userId: string, merchantId: string) {
       },
     },
     include: {
-      cartItem: true,
+      cartItem: {
+        include: {
+          menu: true,
+        },
+      },
     },
   });
 
@@ -115,6 +119,9 @@ export async function updateCustomerCart(
           menuId: menu.id,
         },
       },
+      include: {
+        menu: true,
+      },
     });
 
     return deletedCartItem;
@@ -143,6 +150,9 @@ export async function updateCustomerCart(
           id: menu.id,
         },
       },
+    },
+    include: {
+      menu: true,
     },
   });
 

@@ -21,6 +21,17 @@ export function isUserAuth(req: Request, res: Response, next: NextFunction) {
   return next();
 }
 
+export function isAdmin(req: Request, res: Response, next: NextFunction) {
+  // extends isUserAuth
+  isUserAuth(req, res, next);
+
+  const { role } = res.locals.user;
+
+  if (role !== "ADMIN") {
+    throw new UnauthorizedError("User is not an Admin!");
+  }
+}
+
 export async function publicMerchantRoute(
   req: Request,
   res: Response,

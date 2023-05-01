@@ -37,6 +37,8 @@ model Customer {
   user User @relation(fields: [userId], references: [id])
 
   cart Cart[]
+
+  voucher Voucher[]
 }
 
 model Driver {
@@ -112,8 +114,27 @@ model CartItem{
   @@unique([cartId, menuId])
 }
 
+model Voucher{
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  discount Float
+  maximumDiscount Float
+  minimumPurchase Float
+  
+  logo String @default("https://drive.google.com/uc?id=1pugaO1_NFSYN4m9FvnFqsWCckfND5euD")
+  title String
+  description String
+  details String
+
+  expiryDate DateTime
+  isUsed Boolean @default(false)
+
+  customerId String @db.ObjectId
+  customer Customer @relation(fields: [customerId], references: [id])
+}
+
 enum Role {
   CUSTOMER
   MERCHANT
   DRIVER
+  ADMIN
 }

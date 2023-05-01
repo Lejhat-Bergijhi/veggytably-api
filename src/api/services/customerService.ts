@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Voucher } from "@prisma/client";
 import { BadRequestError } from "../utils/exceptions/BadRequestError";
 import { UnauthorizedError } from "../utils/exceptions/UnauthorizedError";
 
@@ -39,6 +39,7 @@ export async function updateCustomerProfile(userId: string, data: any) {
   return user;
 }
 
+// cart
 export async function getCustomerCart(userId: string) {
   const cart = await prisma.cart.findMany({
     where: {
@@ -196,4 +197,62 @@ async function getCartByCustomerIdAndMerchantId(
   }
 
   return cart;
+}
+
+export async function getTotalPrice(cartId: string) {
+  const cart = await prisma.cart.findUnique({
+    where: {
+      id: cartId,
+    },
+    include: {
+      cartItem: {
+        include: {
+          menu: true,
+        },
+      },
+    },
+  });
+
+  const totalPrice = cart.cartItem.reduce((acc, ci) => {
+    return acc + ci.menu.price * ci.quantity;
+  }, 0);
+
+  return totalPrice;
+}
+
+// voucher
+export async function getCustomerVouchersByUserId(userId: string) {
+  const customer = await prisma.customer.findUnique({
+    where: {
+      userId: userId,
+    },
+  });
+
+  const vouchers = await prisma.voucher.findMany({
+    where: {
+      customerId: customer.id,
+    },
+  });
+
+  return vouchers;
+}
+
+export async function labelVoucherEligibility(
+  vouchers: Voucher[],
+  cartId: string
+) {
+  /**
+   * returns voucher with boolean isEligible
+   */
+  const totalPrice = await getTotalPrice(cartId);
+
+  const eligibleVouchers = vouchers.map((v) => {
+    if (v.minimumPurchase <= totalPrice) {
+      return { ...v, isEligible: true };
+    } else {
+      return { ...v, isEligible: false };
+    }
+  });
+
+  return eligibleVouchers;
 }

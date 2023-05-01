@@ -16,4 +16,10 @@ router.get("/cart/:merchantId", isUserAuth, customerController.getOneCart);
 router.put("/cart/:merchantId", isUserAuth, customerController.updateCart);
 router.delete("/cart/:merchantId", isUserAuth, customerController.deleteCart);
 
+router.get(
+  "/cart/:cartId/vouchers",
+  isUserAuth,
+  customerController.getVouchers
+);
+
 export default router;

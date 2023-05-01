@@ -3,6 +3,9 @@ import {
   deleteCustomerCart,
   getCartUnique,
   getCustomerCart,
+  getCustomerVouchersByUserId,
+  getTotalPrice,
+  labelVoucherEligibility,
   updateCustomerCart,
   updateCustomerProfile,
 } from "../services/customerService";
@@ -87,10 +90,38 @@ async function deleteCart(req: Request, res: Response) {
   });
 }
 
+/**
+ * @route    /cart/:cartId/vouchers
+ * @desc     get vouchers for a cart
+ * @access   private
+ */
+async function getVouchers(req: Request, res: Response) {
+  const payload = res.locals.user;
+  const { userId } = payload;
+  const { cartId } = req.params;
+
+  // get vouchers for a cart
+  const vouchers = await getCustomerVouchersByUserId(userId);
+
+  // get cart total
+  const totalPrice = await getTotalPrice(cartId);
+
+  // label voucher eligibility for cart
+  const cartVouchers = await labelVoucherEligibility(vouchers, cartId);
+
+  res.status(200).json({
+    data: {
+      total: totalPrice,
+      vouchers: cartVouchers,
+    },
+  });
+}
+
 export default {
   updateProfile,
   getCartList,
   getOneCart,
   updateCart,
   deleteCart,
+  getVouchers,
 };

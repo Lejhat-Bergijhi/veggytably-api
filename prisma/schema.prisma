@@ -20,6 +20,7 @@ model User {
   phone String
   profilePicture Bytes?
   tokenVersion Int @default(0)
+  wallet Float @default(0)
 
   role Role @default(CUSTOMER)
   customer Customer?

@@ -9,11 +9,14 @@ async function getWallet(req: Request, res: Response) {
 
   res.status(200).json({
     data: {
-      wallet,
+      wallet: wallet,
     },
   });
 }
 
+async function createTransaction(req: Request, res: Response) {}
+
 export default {
   getWallet,
+  createTransaction,
 };

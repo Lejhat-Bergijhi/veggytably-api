@@ -40,6 +40,8 @@ model Customer {
   cart Cart[]
 
   voucher Voucher[]
+
+  transaction Transaction[]
 }
 
 model Driver {
@@ -49,6 +51,8 @@ model Driver {
 
   userId String @unique @db.ObjectId
   user User @relation(fields: [userId], references: [id])
+
+  transaction Transaction[]
 }
 
 model Merchant {
@@ -59,8 +63,12 @@ model Merchant {
 
   userId String @unique @db.ObjectId
   user User @relation(fields: [userId], references: [id])
+
   menu Menu[]
+
   cart Cart[]
+  
+  transaction Transaction[]
 }
 
 
@@ -99,6 +107,8 @@ model Cart {
   merchantId String @db.ObjectId
   merchant Merchant @relation(fields: [merchantId], references: [id])
 
+  transaction Transaction[]
+
   @@unique([customerId, merchantId])
 }
 
@@ -131,6 +141,31 @@ model Voucher{
 
   customerId String @db.ObjectId
   customer Customer @relation(fields: [customerId], references: [id])
+}
+
+model Transaction {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  date DateTime @default(now())
+  status TransactionStatus @default(PROCESSING)
+
+  cartId String @db.ObjectId
+  cart Cart @relation(fields: [cartId], references: [id])
+
+  customerId String @db.ObjectId
+  customer Customer @relation(fields: [customerId], references: [id])
+
+  merchantId String @db.ObjectId
+  merchant Merchant @relation(fields: [merchantId], references: [id])
+
+  driverId String? @db.ObjectId
+  driver Driver? @relation(fields: [driverId], references: [id])
+}
+
+enum TransactionStatus {
+  FINISHED
+  ON_DELIVERY
+  PROCESSING
+  RECEIVED
 }
 
 enum Role {

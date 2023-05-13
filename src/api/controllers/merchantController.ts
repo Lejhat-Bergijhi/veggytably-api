@@ -245,7 +245,6 @@ async function getMenuImage(req: Request, res: Response) {
   const buffer = await findMenuImage(imageId);
 
   const compressedBuffer = await compressImage(buffer, 10 * 1024);
-  console.log(compressedBuffer.length);
   // set content type in headers
   res.set("Content-Type", "image/jpeg");
 

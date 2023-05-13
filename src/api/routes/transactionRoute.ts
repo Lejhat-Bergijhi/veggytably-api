@@ -19,6 +19,6 @@ router.get("/wallet", isUserAuth, transactionController.getWallet);
 
 // incrementing and decrementing wallet will happen in a transaction
 
-router.post("/", isUserAuth, transactionController.createTransaction);
+router.post("/", isUserAuth, transactionController.postTransaction); // created by customer
 
 export default router;

@@ -146,7 +146,7 @@ model Voucher{
 model Transaction {
   id String @id @default(auto()) @map("_id") @db.ObjectId
   date DateTime @default(now())
-  status TransactionStatus @default(PROCESSING)
+  status TransactionStatus @default(RECEIVED)
 
   cartId String @db.ObjectId
   cart Cart @relation(fields: [cartId], references: [id])

@@ -1,6 +1,9 @@
 import { Request, Response } from "express";
 import { getWalletByUserId } from "../services/walletService";
-import { createTransaction } from "../services/transactionService";
+import {
+  createTransaction,
+  getTransactionsByUserId,
+} from "../services/transactionService";
 
 import { socketManager } from "../../config/socket";
 
@@ -17,6 +20,20 @@ async function getWallet(req: Request, res: Response) {
   });
 }
 
+async function getTransactions(req: Request, res: Response) {
+  const payload = res.locals.user;
+  const { userId } = payload;
+  const { role } = payload;
+
+  const transaction = await getTransactionsByUserId(userId, role);
+
+  res.status(200).json({
+    data: {
+      transaction: transaction,
+    },
+  });
+}
+
 async function postTransaction(req: Request, res: Response) {
   const payload = res.locals.user;
   const { userId } = payload;
@@ -24,9 +41,9 @@ async function postTransaction(req: Request, res: Response) {
 
   const transaction = await createTransaction(userId, cartId, merchantId);
 
-  // broadcast to merchant
+  // broadcast to selected merchant
   const merchantNamespace = socketManager.getMerchantNamespace();
-  merchantNamespace.emit("transaction", transaction);
+  merchantNamespace.to(merchantId).emit("transaction", transaction);
 
   res.status(200).json({
     data: {
@@ -37,5 +54,6 @@ async function postTransaction(req: Request, res: Response) {
 
 export default {
   getWallet,
+  getTransactions,
   postTransaction,
 };

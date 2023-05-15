@@ -1,8 +1,39 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Role } from "@prisma/client";
 import { BadRequestError } from "../utils/exceptions/BadRequestError";
 import { InternalServerError } from "../utils/exceptions/InternalServerError";
 
 const prisma = new PrismaClient();
+
+export async function getTransactionsByUserId(userId: string, role: Role) {
+  if (!userId) {
+    throw new BadRequestError("userId is required.");
+  }
+
+  if (!(role in Role)) {
+    console.log(role);
+    throw new BadRequestError("Invalid role.");
+  }
+
+  const userRole = prisma[role.toLowerCase()].findUnique({
+    where: {
+      userId: userId,
+    },
+  });
+
+  if (!userRole) {
+    throw new BadRequestError(`${role} not found.`);
+  }
+
+  const transactions = await prisma.transaction.findMany({
+    where: {
+      [`${role.toLowerCase()}Id`]: {
+        equals: userRole.id,
+      },
+    },
+  });
+
+  return transactions;
+}
 
 export async function createTransaction(
   userId: string,

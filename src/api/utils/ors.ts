@@ -24,6 +24,15 @@ class Ors {
     return data;
   }
 
+  parseDirectionResponse(data: any) {
+    const { features } = data;
+
+    const route = features[0].geometry.coordinates;
+    const { distance, duration } = features[0].properties.summary;
+
+    return { route, distance, duration };
+  }
+
   // geocode
   async searchGeocode(query: string, boundaryCountry = "ID") {
     const url = `${this.baseUrl}/geocode/search?api_key=${this.apiKey}&text=${query}&boundary.country=${boundaryCountry}`;

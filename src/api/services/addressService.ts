@@ -11,7 +11,7 @@ class AdressService {
     this.ors = new Ors();
   }
 
-  async createAddress(input: {
+  public async createAddress(input: {
     coordinates: {
       latitude: number;
       longitude: number;
@@ -63,6 +63,11 @@ class AdressService {
       });
       return adr;
     }
+  }
+
+  public addressToCoordinates(address: Address) {
+    const { latitude, longitude } = address;
+    return { latitude, longitude };
   }
 
   async createDefaultAddress() {

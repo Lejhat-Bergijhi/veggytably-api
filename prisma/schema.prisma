@@ -13,29 +13,28 @@ datasource db {
 // restrictions: dairy-free, meat-free, fish-free, gluten-free, egg-free, nut-free
 
 model User {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  username String
-  email String @unique
-  password String
-  phone String
+  id             String @id @default(auto()) @map("_id") @db.ObjectId
+  username       String
+  email          String @unique
+  password       String
+  phone          String
   profilePicture Bytes?
-  tokenVersion Int @default(0)
-  wallet Float @default(0)
+  tokenVersion   Int    @default(0)
+  wallet         Float  @default(0)
 
-  role Role @default(CUSTOMER)
+  role     Role      @default(CUSTOMER)
   customer Customer?
-  driver Driver?
+  driver   Driver?
   merchant Merchant?
 }
 
-
 model Customer {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  address String?
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  address      String?
   restrictions Boolean[] @default([false, true, true, false, false, false])
-  
+
   userId String @unique @db.ObjectId
-  user User @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
 
   cart Cart[]
 
@@ -45,52 +44,51 @@ model Customer {
 }
 
 model Driver {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  licensePlate String @unique
-  vehicleType String
+  id           String  @id @default(auto()) @map("_id") @db.ObjectId
+  licensePlate String  @unique
+  vehicleType  String
 
   userId String @unique @db.ObjectId
-  user User @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
 
   transaction Transaction[]
 }
 
 model Merchant {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  restaurantName String
+  id                String @id @default(auto()) @map("_id") @db.ObjectId
+  restaurantName    String
   restaurantAddress String
-  rating Float? @default(0)
+  rating            Float? @default(0)
 
   userId String @unique @db.ObjectId
-  user User @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
 
   menu Menu[]
 
   cart Cart[]
-  
+
   transaction Transaction[]
 }
 
-
 model Menu {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  name String
-  price Float
-  description String?
-  inStock Boolean @default(true)
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  price        Float
+  description  String?
+  inStock      Boolean   @default(true)
   restrictions Boolean[] @default([false, false, false, false, false, false])
 
-  imageId String? @db.ObjectId
-  image MenuImage? @relation(fields: [imageId], references: [id])
+  imageId String?    @db.ObjectId
+  image   MenuImage? @relation(fields: [imageId], references: [id])
 
-  merchantId String @db.ObjectId
-  merchant Merchant @relation(fields: [merchantId], references: [id])
+  merchantId String   @db.ObjectId
+  merchant   Merchant @relation(fields: [merchantId], references: [id])
 
   cartItem CartItem[]
 }
 
 model MenuImage {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
+  id    String @id @default(auto()) @map("_id") @db.ObjectId
   image Bytes
 
   menu Menu[]
@@ -100,84 +98,85 @@ model Cart {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
   cartItem CartItem[]
-  
-  customerId String @db.ObjectId
-  customer Customer @relation(fields: [customerId], references: [id])
 
-  merchantId String @db.ObjectId
-  merchant Merchant @relation(fields: [merchantId], references: [id])
+  customerId String   @db.ObjectId
+  customer   Customer @relation(fields: [customerId], references: [id])
+
+  merchantId String   @db.ObjectId
+  merchant   Merchant @relation(fields: [merchantId], references: [id])
 
   transaction Transaction[]
 
   @@unique([customerId, merchantId])
 }
 
-model CartItem{
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  quantity Int @default(1)
+model CartItem {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  quantity Int    @default(1)
 
   cartId String @db.ObjectId
-  cart Cart @relation(fields: [cartId], references: [id])
+  cart   Cart   @relation(fields: [cartId], references: [id])
 
   menuId String @db.ObjectId
-  menu Menu @relation(fields: [menuId], references: [id])
+  menu   Menu   @relation(fields: [menuId], references: [id])
 
   @@unique([cartId, menuId])
 }
 
-model Voucher{
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  discount Float
+model Voucher {
+  id              String @id @default(auto()) @map("_id") @db.ObjectId
+  discount        Float
   maximumDiscount Float
   minimumPurchase Float
-  
-  logo String @default("https://drive.google.com/uc?id=1pugaO1_NFSYN4m9FvnFqsWCckfND5euD")
-  title String
+
+  logo        String @default("https://drive.google.com/uc?id=1pugaO1_NFSYN4m9FvnFqsWCckfND5euD")
+  title       String
   description String
-  details String
+  details     String
 
   expiryDate DateTime
-  isUsed Boolean @default(false)
+  isUsed     Boolean  @default(false)
 
-  customerId String @db.ObjectId
-  customer Customer @relation(fields: [customerId], references: [id])
+  customerId String   @db.ObjectId
+  customer   Customer @relation(fields: [customerId], references: [id])
 }
 
 model Transaction {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  date DateTime @default(now())
-  status TransactionStatus @default(RECEIVED)
-  
-  pickupAddressId String @db.ObjectId
-  pickupAddress Address @relation("pickupAddress", fields: [pickupAddressId], references: [id])
+  id            String            @id @default(auto()) @map("_id") @db.ObjectId
+  date          DateTime          @default(now())
+  status        TransactionStatus @default(RECEIVED)
+  paymentMethod PaymentMethod     @default(CASH)
 
-  customerAddressId String @db.ObjectId
-  customerAddress Address @relation("customerAddress", fields: [customerAddressId], references: [id])
+  pickupAddressId String  @db.ObjectId
+  pickupAddress   Address @relation("pickupAddress", fields: [pickupAddressId], references: [id])
+
+  customerAddressId String  @db.ObjectId
+  customerAddress   Address @relation("customerAddress", fields: [customerAddressId], references: [id])
 
   cartId String @db.ObjectId
-  cart Cart @relation(fields: [cartId], references: [id])
+  cart   Cart   @relation(fields: [cartId], references: [id])
 
-  customerId String @db.ObjectId
-  customer Customer @relation(fields: [customerId], references: [id])
+  customerId String   @db.ObjectId
+  customer   Customer @relation(fields: [customerId], references: [id])
 
-  merchantId String @db.ObjectId
-  merchant Merchant @relation(fields: [merchantId], references: [id])
+  merchantId String   @db.ObjectId
+  merchant   Merchant @relation(fields: [merchantId], references: [id])
 
   driverId String? @db.ObjectId
-  driver Driver? @relation(fields: [driverId], references: [id])
+  driver   Driver? @relation(fields: [driverId], references: [id])
 }
 
 model Address {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  address String
+  id         String  @id @default(auto()) @map("_id") @db.ObjectId
+  address    String
   postalCode String?
-  city String?
-  province String?
+  city       String?
+  province   String?
 
-  latitude Float
+  latitude  Float
   longitude Float
 
-  pickupAddress Transaction[] @relation("pickupAddress")
+  pickupAddress   Transaction[] @relation("pickupAddress")
   customerAddress Transaction[] @relation("customerAddress")
 }
 
@@ -193,4 +192,9 @@ enum Role {
   MERCHANT
   DRIVER
   ADMIN
+}
+
+enum PaymentMethod {
+  CASH
+  WALLET
 }

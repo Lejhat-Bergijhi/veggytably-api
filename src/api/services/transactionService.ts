@@ -30,6 +30,20 @@ export async function getTransactionsByUserId(userId: string, role: Role) {
         equals: userRole.id,
       },
     },
+    include: {
+      cart: {
+        include: {
+          cartItem: true,
+        },
+      },
+      customer: {
+        include: {
+          user: true,
+        },
+      },
+      merchant: true,
+      driver: true,
+    },
   });
 
   return transactions;
@@ -91,6 +105,20 @@ export async function createTransaction(
           id: merchant.id,
         },
       },
+    },
+    include: {
+      cart: {
+        include: {
+          cartItem: true,
+        },
+      },
+      customer: {
+        include: {
+          user: true,
+        },
+      },
+      merchant: true,
+      driver: true,
     },
   });
 

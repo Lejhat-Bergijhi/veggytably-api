@@ -24,7 +24,12 @@ class SocketManager {
       console.log("a merchant has connected");
 
       socket.on("subscribe", (merchantId) => {
+        console.log("merchant subscribed to " + merchantId);
         socket.join(merchantId);
+      });
+
+      socket.on("disconnect", () => {
+        console.log("a merchant has disconnected");
       });
     });
   }

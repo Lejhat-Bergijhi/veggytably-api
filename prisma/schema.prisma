@@ -147,6 +147,12 @@ model Transaction {
   id String @id @default(auto()) @map("_id") @db.ObjectId
   date DateTime @default(now())
   status TransactionStatus @default(RECEIVED)
+  
+  pickupAddressId String @db.ObjectId
+  pickupAddress Address @relation("pickupAddress", fields: [pickupAddressId], references: [id])
+
+  customerAddressId String @db.ObjectId
+  customerAddress Address @relation("customerAddress", fields: [customerAddressId], references: [id])
 
   cartId String @db.ObjectId
   cart Cart @relation(fields: [cartId], references: [id])
@@ -159,6 +165,20 @@ model Transaction {
 
   driverId String? @db.ObjectId
   driver Driver? @relation(fields: [driverId], references: [id])
+}
+
+model Address {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  address String
+  postalCode String?
+  city String?
+  province String?
+
+  latitude Float
+  longitude Float
+
+  pickupAddress Transaction[] @relation("pickupAddress")
+  customerAddress Transaction[] @relation("customerAddress")
 }
 
 enum TransactionStatus {

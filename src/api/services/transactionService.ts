@@ -1,6 +1,7 @@
 import { PrismaClient, Role } from "@prisma/client";
 import { BadRequestError } from "../utils/exceptions/BadRequestError";
 import { InternalServerError } from "../utils/exceptions/InternalServerError";
+import { addressService } from "./addressService";
 
 const prisma = new PrismaClient();
 
@@ -52,7 +53,14 @@ export async function getTransactionsByUserId(userId: string, role: Role) {
 export async function createTransaction(
   userId: string,
   cartId: string,
-  merchantId: string
+  merchantId: string,
+  customerAddress: {
+    coordinates: {
+      latitude: number;
+      longitude: number;
+    } | null;
+    address: string | null;
+  }
 ) {
   if (!userId || !cartId || !merchantId) {
     throw new BadRequestError("userId, cartId, and merchantId are required.");
@@ -88,6 +96,20 @@ export async function createTransaction(
     throw new BadRequestError("Merchant not found.");
   }
 
+  // create address from input
+  if (!customerAddress.coordinates && !customerAddress.address) {
+    throw new BadRequestError("coordinates or address is required.");
+  }
+
+  const cusAdr = await addressService.createAddress(customerAddress);
+
+  // TODO: implement merchant address
+  const merchantAdr = await prisma.address.findUnique({
+    where: {
+      id: "646b3c4324a69f8b9766d55d", // mipa ugm
+    },
+  });
+
   const transaction = await prisma.transaction.create({
     data: {
       cart: {
@@ -103,6 +125,16 @@ export async function createTransaction(
       merchant: {
         connect: {
           id: merchant.id,
+        },
+      },
+      customerAddress: {
+        connect: {
+          id: cusAdr.id,
+        },
+      },
+      pickupAddress: {
+        connect: {
+          id: merchantAdr.id,
         },
       },
     },

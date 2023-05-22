@@ -37,9 +37,14 @@ async function getTransactions(req: Request, res: Response) {
 async function postTransaction(req: Request, res: Response) {
   const payload = res.locals.user;
   const { userId } = payload;
-  const { cartId, merchantId } = req.body;
+  const { cartId, merchantId, customerAddress } = req.body;
 
-  const transaction = await createTransaction(userId, cartId, merchantId);
+  const transaction = await createTransaction(
+    userId,
+    cartId,
+    merchantId,
+    customerAddress
+  );
 
   // broadcast to selected merchant
   const merchantNamespace = socketManager.getMerchantNamespace();

@@ -69,7 +69,7 @@ class SocketManager {
         const merchantAddress = address.merchantAddress as Address;
         const customerAddress = address.customerAddress as Address;
 
-        const response = await driverService.getTransactionRoute(
+        const routes = await driverService.getTransactionRoute(
           location,
           addressService.addressToCoordinates(merchantAddress),
           addressService.addressToCoordinates(customerAddress)
@@ -77,7 +77,7 @@ class SocketManager {
 
         /** broadcast to drivers
          * information:
-         * - location of merchant + customer  && (route)
+         * - location of merchant + customer  && (s)
          * - order list
          * - total fee that needs to be paid by the customer + payment choice
          */
@@ -85,14 +85,8 @@ class SocketManager {
           transactionId
         );
 
-        const { route, distance, duration } = ors.parseDirectionResponse(
-          response.driverToMerchant
-        );
-
-        driverService.broadcastToDriver(userId, "transaction", {
-          route: route,
-          distance: distance, // in meters
-          duration: duration, // in seconds
+        const res = {
+          routes: routes,
           merchantAddress: merchantAddress,
           customerAddress: customerAddress,
           orderList: transaction.cart.cartItem,
@@ -100,8 +94,12 @@ class SocketManager {
           totalPrice: transactionService.totalPriceByCartItems(
             transaction.cart.cartItem
           ),
+          customerName: transaction.customer.user.username,
           // TODO: ongkos kirim
-        });
+        };
+
+        console.log(res);
+        driverService.broadcastToDriver(userId, "newOrder", res);
       });
 
       socket.on("disconnect", () => {

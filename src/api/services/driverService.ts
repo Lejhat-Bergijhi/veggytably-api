@@ -63,9 +63,15 @@ class DriverService {
       customerLocation
     );
 
+    // parse response
+    const driverToMerchantRoute =
+      this.ors.parseDirectionResponse(driverToMerchant);
+    const merchantToCustomerRoute =
+      this.ors.parseDirectionResponse(merchantToCustomer);
+
     const route = {
-      driverToMerchant: driverToMerchant,
-      merchantToCustomer: merchantToCustomer,
+      driverToMerchant: driverToMerchantRoute,
+      merchantToCustomer: merchantToCustomerRoute,
     };
 
     return route;

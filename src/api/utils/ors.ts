@@ -27,10 +27,10 @@ class Ors {
   parseDirectionResponse(data: any) {
     const { features } = data;
 
-    const route = features[0].geometry.coordinates;
+    const coordinates = features[0].geometry.coordinates;
     const { distance, duration } = features[0].properties.summary;
 
-    return { route, distance, duration };
+    return { coordinates, distance, duration };
   }
 
   // geocode

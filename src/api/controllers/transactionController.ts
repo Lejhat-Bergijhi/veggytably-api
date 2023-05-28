@@ -64,7 +64,6 @@ async function postTransaction(req: Request, res: Response) {
   const driver = driverService.getClosestDriver();
   // broadcast to driver
   // get driver location then broadcast to driver
-  console.log(`broadcasting to driver ${driver}`);
   driverService.broadcastToDriver(driver, "location", {
     transactionId: transaction.id,
     merchantAddress: merAdr,
@@ -73,7 +72,6 @@ async function postTransaction(req: Request, res: Response) {
   // server will be listening for "location" event from driver
   // then server will send the route to the driver
   // logic for the callback is in driverService.ts and socket.ts
-  // i wanna unalive
 
   res.status(200).json({
     data: {

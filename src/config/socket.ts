@@ -10,11 +10,9 @@ class SocketManager {
   private io: Server;
   private merchantNamespace: Namespace;
   private driverNamespace: Namespace;
-  private driverService: DriverService;
+  private customerNamespace: Namespace;
 
-  constructor() {
-    this.driverService = driverService;
-  }
+  constructor() {}
 
   init(server: http.Server) {
     this.io = new Server(server);
@@ -107,6 +105,24 @@ class SocketManager {
         console.log(this.getRooms("/driver"));
       });
     });
+
+    /**
+     * Customer namespace
+     */
+    this.customerNamespace = this.io.of("/customer");
+
+    this.customerNamespace.on("connection", (socket) => {
+      console.log("a customer has connected");
+
+      socket.on("subscribe", (transactionId) => {
+        console.log("customer subscribed to " + transactionId);
+        socket.join(transactionId);
+      });
+
+      socket.on("disconnect", () => {
+        console.log("a customer has disconnected");
+      });
+    });
   }
 
   public getIO() {
@@ -119,6 +135,10 @@ class SocketManager {
 
   public getDriverNamespace() {
     return this.driverNamespace;
+  }
+
+  public getCustomerNamespace() {
+    return this.customerNamespace;
   }
 
   public async getSockets(namespace = "/") {

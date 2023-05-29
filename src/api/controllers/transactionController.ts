@@ -95,6 +95,7 @@ async function postTransaction(req: Request, res: Response) {
   res.status(200).json({
     data: {
       transactionId: transaction.id,
+      status: transaction.status,
       merchantAddress: merAdr,
       customerAddress: cusAdr,
       estimatedDeliveryTime: merchantToCustomer.duration + 10 * 60, // seconds
@@ -116,6 +117,17 @@ async function addDriverTransaction(req: Request, res: Response) {
     userId,
     transactionId
   );
+
+  // broadcast to customer
+  const customerNamespace = socketManager.getCustomerNamespace();
+  customerNamespace
+    .to(transaction.customerId)
+    .to(transactionId)
+    .emit("driver-found", {
+      driverId: userId,
+      driverName: transaction.driver.user.username,
+      driverPlateNumber: transaction.driver.licensePlate,
+    });
 
   res.status(200).json({
     data: {

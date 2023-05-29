@@ -310,6 +310,13 @@ class TransactionService {
           },
         },
       },
+      include: {
+        driver: {
+          include: {
+            user: true,
+          },
+        },
+      },
     });
 
     if (!transaction) {

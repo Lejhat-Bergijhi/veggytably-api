@@ -2,12 +2,15 @@ import { CartItem, PaymentMethod, PrismaClient, Role } from "@prisma/client";
 import { BadRequestError } from "../utils/exceptions/BadRequestError";
 import { InternalServerError } from "../utils/exceptions/InternalServerError";
 import { addressService } from "./addressService";
+import { Ors, ors } from "../utils/ors";
 
 class TransactionService {
   private prisma: PrismaClient;
+  private ors: Ors;
 
   constructor() {
     this.prisma = new PrismaClient();
+    this.ors = ors;
   }
 
   public async getTransactionById(transactionId: string) {
@@ -52,7 +55,6 @@ class TransactionService {
     }
 
     if (!(role in Role)) {
-      console.log(role);
       throw new BadRequestError("Invalid role.");
     }
 
@@ -223,7 +225,11 @@ class TransactionService {
       include: {
         cart: {
           include: {
-            cartItem: true,
+            cartItem: {
+              include: {
+                menu: true,
+              },
+            },
           },
         },
         customer: {
@@ -257,6 +263,60 @@ class TransactionService {
     });
 
     return totalPrice;
+  }
+
+  public async getMerchant2CustomerRoute(
+    merchantLocation: { latitude: number; longitude: number },
+    customerLocation: { latitude: number; longitude: number }
+  ) {
+    const merchantToCustomer = await this.ors.getDirections(
+      merchantLocation,
+      customerLocation
+    );
+
+    const merchantToCustomerRoute =
+      this.ors.parseDirectionResponse(merchantToCustomer);
+
+    const route = {
+      merchantToCustomer: merchantToCustomerRoute,
+    };
+
+    return route;
+  }
+
+  public async acceptOrder(userId: string, transactionId: string) {
+    if (!userId || !transactionId) {
+      throw new BadRequestError("userId and transactionId are required.");
+    }
+
+    const driver = await this.prisma.driver.findUnique({
+      where: {
+        userId: userId,
+      },
+    });
+
+    if (!driver) {
+      throw new BadRequestError("Driver not found.");
+    }
+
+    const transaction = await this.prisma.transaction.update({
+      where: {
+        id: transactionId,
+      },
+      data: {
+        driver: {
+          connect: {
+            id: driver.id,
+          },
+        },
+      },
+    });
+
+    if (!transaction) {
+      throw new BadRequestError("Transaction not found.");
+    }
+
+    return transaction;
   }
 }
 

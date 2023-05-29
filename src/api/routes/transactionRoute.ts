@@ -21,5 +21,10 @@ router.get("/wallet", isUserAuth, transactionController.getWallet);
 
 router.get("/", isUserAuth, transactionController.getTransactions);
 router.post("/", isUserAuth, transactionController.postTransaction); // created by customer
+router.put(
+  "/:transactionId/accept",
+  isUserAuth,
+  transactionController.addDriverTransaction
+); // created by driver
 
 export default router;

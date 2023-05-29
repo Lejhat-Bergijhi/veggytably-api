@@ -61,7 +61,7 @@ class SocketManager {
 
       socket.on("handshake", async (data) => {
         console.log("location received");
-        console.log(data);
+        // console.log(data);
 
         const { userId, location, address, transactionId } = data;
         // TODO: validate data
@@ -86,6 +86,7 @@ class SocketManager {
         );
 
         const res = {
+          transactionId: transaction.id,
           routes: routes,
           merchantAddress: merchantAddress,
           customerAddress: customerAddress,
@@ -98,7 +99,6 @@ class SocketManager {
           // TODO: ongkos kirim
         };
 
-        console.log(res);
         driverService.broadcastToDriver(userId, "newOrder", res);
       });
 

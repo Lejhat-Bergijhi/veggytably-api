@@ -73,6 +73,50 @@ async function postTransaction(req: Request, res: Response) {
   // then server will send the route to the driver
   // logic for the callback is in driverService.ts and socket.ts
 
+  //  customer
+  //  customer needs to listen for the driver that accepts the order
+  /**
+   *      The delivery partner's data, such as name and the plate number
+   *      A map that shows the restaurant's and the customer's locations
+   *      The estimated delivery time
+   *
+   *      The delivery partner that has finished the delivery can then press the "Finished" button on their side to state that the order has been completed.
+   */
+
+  // calculate distance between merchant and customer
+  const { merchantToCustomer } =
+    await transactionService.getMerchant2CustomerRoute(
+      { latitude: merAdr.latitude, longitude: merAdr.longitude },
+      { latitude: cusAdr.latitude, longitude: cusAdr.longitude }
+    );
+
+  const merchant = transaction.merchant;
+
+  res.status(200).json({
+    data: {
+      transactionId: transaction.id,
+      merchantAddress: merAdr,
+      customerAddress: cusAdr,
+      estimatedDeliveryTime: merchantToCustomer.duration + 10 * 60, // seconds
+      merchant: merchant,
+      cart: transaction.cart,
+      totalPrice: totalPrice,
+      deliveryFee: 10000,
+    },
+  });
+}
+
+// driver accepts the order
+async function addDriverTransaction(req: Request, res: Response) {
+  const payload = res.locals.user;
+  const { userId } = payload;
+  const { transactionId } = req.params;
+
+  const transaction = await transactionService.acceptOrder(
+    userId,
+    transactionId
+  );
+
   res.status(200).json({
     data: {
       transaction: transaction,
@@ -84,4 +128,5 @@ export default {
   getWallet,
   getTransactions,
   postTransaction,
+  addDriverTransaction,
 };

@@ -25,6 +25,12 @@ router.put(
   "/:transactionId/accept",
   isUserAuth,
   transactionController.addDriverTransaction
-); // created by driver
+);
+
+router.put(
+  "/:transactionId/status",
+  isUserAuth,
+  transactionController.updateTransactionStatus
+);
 
 export default router;

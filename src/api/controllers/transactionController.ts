@@ -136,9 +136,37 @@ async function addDriverTransaction(req: Request, res: Response) {
   });
 }
 
+// driver updates the status of the order
+async function updateTransactionStatus(req: Request, res: Response) {
+  const payload = res.locals.user;
+  const { userId } = payload;
+  const { transactionId } = req.params;
+  const { status } = req.body;
+
+  const transaction = await transactionService.updateTransactionStatus(
+    userId,
+    transactionId,
+    status
+  );
+
+  // broadcast to customer
+  const customerNamespace = socketManager.getCustomerNamespace();
+  customerNamespace.to(transaction.customerId).emit("status-update", {
+    transactionId: transactionId,
+    status: status,
+  });
+
+  res.status(200).json({
+    data: {
+      transaction: transaction,
+    },
+  });
+}
+
 export default {
   getWallet,
   getTransactions,
   postTransaction,
   addDriverTransaction,
+  updateTransactionStatus,
 };

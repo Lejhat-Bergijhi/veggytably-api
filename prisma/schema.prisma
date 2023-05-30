@@ -144,7 +144,7 @@ model Voucher {
 model Transaction {
   id            String            @id @default(auto()) @map("_id") @db.ObjectId
   date          DateTime          @default(now())
-  status        TransactionStatus @default(RECEIVED)
+  status        TransactionStatus @default(PROCESSING)
   paymentMethod PaymentMethod     @default(CASH)
 
   pickupAddressId String  @db.ObjectId

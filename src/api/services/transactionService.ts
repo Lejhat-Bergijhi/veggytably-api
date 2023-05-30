@@ -1,4 +1,10 @@
-import { CartItem, PaymentMethod, PrismaClient, Role } from "@prisma/client";
+import {
+  CartItem,
+  PaymentMethod,
+  PrismaClient,
+  Role,
+  TransactionStatus,
+} from "@prisma/client";
 import { BadRequestError } from "../utils/exceptions/BadRequestError";
 import { InternalServerError } from "../utils/exceptions/InternalServerError";
 import { addressService } from "./addressService";
@@ -316,6 +322,46 @@ class TransactionService {
             user: true,
           },
         },
+      },
+    });
+
+    if (!transaction) {
+      throw new BadRequestError("Transaction not found.");
+    }
+
+    return transaction;
+  }
+
+  public async updateTransactionStatus(
+    userId: string,
+    transactionId: string,
+    status: string
+  ) {
+    if (!userId || !transactionId || !status) {
+      throw new BadRequestError(
+        "userId, transactionId, and status are required."
+      );
+    }
+
+    const driver = await this.prisma.driver.findUnique({
+      where: {
+        userId: userId,
+      },
+    });
+    if (!driver) {
+      throw new BadRequestError("Not a driver.");
+    }
+
+    if (!(status in TransactionStatus)) {
+      throw new BadRequestError("Invalid status input.");
+    }
+
+    const transaction = await this.prisma.transaction.update({
+      where: {
+        id: transactionId,
+      },
+      data: {
+        status: status as TransactionStatus,
       },
     });
 

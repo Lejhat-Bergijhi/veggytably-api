@@ -99,6 +99,44 @@ class TransactionService {
     return transactions;
   }
 
+  public async getTransactionsByMerchantId(merchantId: string) {
+    if (!merchantId) {
+      throw new BadRequestError("merchantId is required.");
+    }
+
+    const merchant = await this.prisma.merchant.findUnique({
+      where: {
+        id: merchantId,
+      },
+    });
+
+    if (!merchant) {
+      throw new BadRequestError("Merchant not found.");
+    }
+
+    const transactions = await this.prisma.transaction.findMany({
+      where: {
+        merchantId: merchantId,
+      },
+      include: {
+        cart: {
+          include: {
+            cartItem: true,
+          },
+        },
+        customer: {
+          include: {
+            user: true,
+          },
+        },
+        merchant: true,
+        driver: true,
+      },
+    });
+
+    return transactions;
+  }
+
   public async createTransaction(
     userId: string,
     cartId: string,

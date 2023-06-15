@@ -35,6 +35,22 @@ async function getTransactions(req: Request, res: Response) {
   });
 }
 
+async function getTransactionsByMerchantId(req: Request, res: Response) {
+  const { merchantId } = req.params;
+
+  const transaction = await transactionService.getTransactionsByMerchantId(
+    merchantId
+  );
+
+  console.log(merchantId);
+
+  res.status(200).json({
+    data: {
+      transaction: transaction,
+    },
+  });
+}
+
 async function postTransaction(req: Request, res: Response) {
   const payload = res.locals.user;
   const { userId } = payload;
@@ -151,7 +167,7 @@ async function updateTransactionStatus(req: Request, res: Response) {
 
   // broadcast to customer
   const customerNamespace = socketManager.getCustomerNamespace();
-  customerNamespace.to(transaction.customerId).emit("status-update", {
+  customerNamespace.to(transaction.id).emit("status-update", {
     transactionId: transactionId,
     status: status,
   });
@@ -166,6 +182,7 @@ async function updateTransactionStatus(req: Request, res: Response) {
 export default {
   getWallet,
   getTransactions,
+  getTransactionsByMerchantId,
   postTransaction,
   addDriverTransaction,
   updateTransactionStatus,

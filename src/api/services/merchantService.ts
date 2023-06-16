@@ -80,7 +80,7 @@ export async function createMenu(
     description,
     imageId,
     inStock,
-    restrictions,
+    restrictions = [true, true, true, true, true, true],
   }: {
     name: string;
     price: number;
@@ -92,7 +92,7 @@ export async function createMenu(
 ) {
   // check if name, price is empty
   if (!name || !price) throw new BadRequestError("Invalid input");
-  if (restrictions.length !== 6)
+  if (restrictions?.length !== 6)
     throw new BadRequestError("Invalid restrictions input");
 
   // find merchant by userId

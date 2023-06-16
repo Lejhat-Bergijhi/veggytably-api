@@ -42,8 +42,6 @@ async function getTransactionsByMerchantId(req: Request, res: Response) {
     merchantId
   );
 
-  console.log(merchantId);
-
   res.status(200).json({
     data: {
       transaction: transaction,

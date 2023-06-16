@@ -72,7 +72,7 @@ async function postTransaction(req: Request, res: Response) {
 
   // broadcast to selected merchant
   const merchantNamespace = socketManager.getMerchantNamespace();
-  merchantNamespace.to(merchantId).emit("transaction", result);
+  merchantNamespace.to(merchantId).emit("transaction", transaction);
 
   // find a driver that is online and near the merchant
   const driver = driverService.getClosestDriver();
